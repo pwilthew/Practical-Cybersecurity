@@ -37,7 +37,7 @@ ARP scan puts `nmap` and its optimized algorithms in charge of ARP requests. And
 
 This is where I got the attacker's MAC address, **00:0c:29:56:c2:fe**. From this scan, we can see that the addresses **192.168.209.{10, 128, 129, 254, 128}** are being used.
 
-Afterwards, a reverse DNS lookup was performed on these IPs. No information was obtained. Also, a port scanning was run on the five hosts. Of these, **192.168.209.254** had all ports closed. 
+Afterwards, a reverse DNS lookup was performed on these IPs; no information was obtained. Also, a port scanning was ran on the five hosts. Of these, **192.168.209.254** had all ports closed. 
 
 Knowing that port 80 was open on **192.168.209.10**, the attacker used a browser to interact with the web server and tried to used common credentials to authenticate.
 
@@ -49,7 +49,7 @@ Using `arpspoof`, he or she blasted out ARP packets telling **00:50:56:28:83:2f*
 
 ![arpspoof](images/arpspoof.png)
 
-As a MITM, the attacker saw packet number 3175 and was able to see someone's authentication credentials:
+As a MITM, the attacker intercepted the following packet and was able to see someone's authentication credentials:
 ![creds](images/creds.png)
 
 ```
