@@ -35,22 +35,21 @@ ARP scan puts `nmap` and its optimized algorithms in charge of ARP requests. And
 
 ![nmap](images/nmap-scan.png)
 
-This is where I got the attacker's MAC address, **00:0c:29:56:c2:fe**. From this scan, we can see that the addresses 192.168.209.{10, 128, 129, 254, 128} are being used.
+This is where I got the attacker's MAC address, **00:0c:29:56:c2:fe**. From this scan, we can see that the addresses **192.168.209.{10, 128, 129, 254, 128}** are being used.
 
-Afterwards, a reverse DNS lookup was performed on these IPs. No information was obtained. Also, a port scanning was run on the five hosts. Of these, 192.168.209.254 had all ports closed. 
+Afterwards, a reverse DNS lookup was performed on these IPs. No information was obtained. Also, a port scanning was run on the five hosts. Of these, **192.168.209.254** had all ports closed. 
 
-Knowing that port 80 was open on 192.168.209.10, the attacker used a browser to interact with the web server and tried to used common credentials to authenticate.
+Knowing that port 80 was open on **192.168.209.10**, the attacker used a browser to interact with the web server and tried to used common credentials to authenticate.
 
 ![failed-auth](images/failed.png)
 
 In order to obtain somebody else's credentials to authenticate with the server, the attacker performed the Man In The Middle (MITM) tecnique.
 
-Using `arpspoof`, he or she blasted out ARP packets telling **00:50:56:28:83:2f** and **00:50:56:39:85:81** that 192.168.209.10 and 192.168.209.128 were at **00:0c:29:56:c2:fe**
+Using `arpspoof`, he or she blasted out ARP packets telling **00:50:56:28:83:2f** and **00:50:56:39:85:81** that **192.168.209.10** and **192.168.209.128** were at **00:0c:29:56:c2:fe**
 
 ![arpspoof](images/arpspoof.png)
 
 As a MITM, the attacker saw packet number 3175 and was able to see someone's authentication credentials:
-
 ![creds](images/creds.png)
 
 ```
@@ -70,18 +69,25 @@ Then the attacker stopped the `arpspoof` and visited the web server with the obt
 3871	235.496051	192.168.209.131	192.168.209.10	HTTP	451	GET /internal_letter.html HTTP/1.1 
 3874	235.505899	192.168.209.10	192.168.209.131	HTTP	5561	HTTP/1.1 200 OK  (text/html)
 ```
+![get](images/get.png)
+
 
 Where he or she found the confidential information.
 
-
 ```html
-<h1><a id="Internal_Confidential_Letter_0"></a>CEO Letter</h1>
-<p>Dear ABC Employee:</p>
-<p>As you all may know, we have been negotiating with Personman Inc. regarding of the sale of our enterprise solution. The last couple months had been a tough time for all of us. But I...m happy to let you know that Personman finally decided to purchase our solution. The next Wednesday, Feb 2, 2017, we will host a meeting with Personman representatives in the Mayflower hotel, Washington D.C. to finalize the sale price.</p>
-<p>Unfortunately, I will be traveling and cannot attend this meeting by myself. The board of directors have decided that our bottom-line is $6,430,000. However, we would like to make a higher profit out of this deal. Please keep this information confidential.</p>
-<p>Thank you for all your hard work and let...s work together to finalize this deal.</p>
-<p>Armin</p>
-<p>CEO</p>
-<p>ABC Inc.</p>
+CEO Letter
+Dear ABC Employee:
+
+As you all may know, we have been negotiating with Personman Inc. regarding of the sale of our enterprise solution. The last couple months had been a tough time for all of us. But I...m happy to let you know that Personman finally decided to purchase our solution. The next Wednesday, Feb 2, 2017, we will host a meeting with Personman representatives in the Mayflower hotel, Washington D.C. to finalize the sale price.
+
+Unfortunately, I will be traveling and cannot attend this meeting by myself. The board of directors have decided that our bottom-line is $6,430,000. However, we would like to make a higher profit out of this deal. Please keep this information confidential.
+
+Thank you for all your hard work and let...s work together to finalize this deal.
+
+Armin
+
+CEO
+
+ABC Inc.
 ```
 
