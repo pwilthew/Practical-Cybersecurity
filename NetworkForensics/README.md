@@ -29,9 +29,9 @@ evidence that helps you reach your conclusion.
 
 ## Analysis
 The first suspicious behavior I noticed was an `nmap` scan with ARP.
-`nmap` is commonly used to scan an ethernet LAN. When `nmap` tries to send a raw IP packet such as an ICMP echo request, the operating system must determine the destination hardware address corresponding to the target IP so that it can properly address the ethernet frame. This is often slow and problematic, since operating systems weren't written with the expectation that they would need to do millions of ARP requests against unavailable hosts in a short time period (in common private network, the majority of the addresses are unused at a given time).
+`nmap` is commonly used to scan an ethernet LAN. When `nmap` tries to send a raw IP packet such as an ICMP echo request, the operating system must determine the destination hardware address corresponding to the target IP so that it can properly address the ethernet frame. This is often slow and problematic, since operating systems weren't written with the expectation that they would need to do millions of ARP requests against unavailable hosts in a short time period (it is common that in private networks, the majority of the addresses are unused at a given time).
 
-ARP scan puts `nmap` and its optimized algorithms in charge of ARP requests. And if it gets a response back, `nmap` doesn't even need to worry about the IP-based ping packets since it already knows the host is up. This makes ARP scan much faster and more reliable than IP-based scans. So it is done by default when scanning ethernet hosts that `Nmap` detects are on a local ethernet network. 
+ARP scan puts `nmap` and its optimized algorithms in charge of ARP requests. And if it gets a response back, `nmap` doesn't even need to worry about the IP-based ping packets since it already knows the host is up. This makes ARP scan much faster and more reliable than IP-based scans. So it is done by default when scanning ethernet hosts that `nmap` detects are on a local ethernet network. 
 
 ![nmap](images/nmap-scan.png)
 
