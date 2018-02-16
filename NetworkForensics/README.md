@@ -39,7 +39,8 @@ would need to do millions of ARP requests against unavailable hosts in a short t
 ARP scan puts `nmap` and its optimized algorithms in charge of ARP requests. And if it gets a 
 response back, `nmap` doesn't even need to worry about the IP-based ping packets since it already 
 knows the host is up. This makes ARP scan much faster and more reliable than IP-based scans. 
-So it is done by default when scanning ethernet hosts that `nmap` detects are on a local ethernet network. 
+So it is done by default when scanning ethernet hosts that `nmap` detects are on a local 
+ethernet network. 
 
 ![nmap](images/nmap-scan.png)
 
@@ -55,7 +56,7 @@ with the web server and tried to used common credentials to authenticate.
 ![failed-auth](images/failed.png)
 
 In order to obtain somebody else's credentials to authenticate with the server, the attacker 
-performed the Man In The Middle (MITM) tecnique.
+performed the Man In The Middle (MITM) technique.
 
 Using `arpspoof`, he or she blasted out ARP packets telling **00:50:56:28:83:2f** and 
 **00:50:56:39:85:81** that **192.168.209.10** and **192.168.209.128** were at **00:0c:29:56:c2:fe**
@@ -65,7 +66,7 @@ Using `arpspoof`, he or she blasted out ARP packets telling **00:50:56:28:83:2f*
 As a MITM, the attacker intercepted several packets, and although we do not have the evidence 
 to prove that he or she intercepted the specific packet with the authentication credentials 
 to the web server, we know that it happened because there is evidence to the fact that he 
-or she was able to authenticate with the corrent credentials.
+or she was able to authenticate with the correct credentials.
 
 
 ```
