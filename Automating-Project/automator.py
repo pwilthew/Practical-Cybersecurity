@@ -12,6 +12,8 @@ import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
 from pytz import timezone
 
+DB_CREDS_FILE = "db_creds.txt"
+
 def read_notices(dir_with_notices):
     """"For all text files (notices) in dir_with_notices,
     return a list of dictionaries containing data in the <Source>
@@ -195,7 +197,7 @@ def get_mac_address_with_ip(ip):
 
 def get_username_of_mac(mac, ip):
     """Given a MAC address, return the user associated with it."""
-    if ip.startswith("172.19."):
+    if ip.startswith(b"172.19."):
         query = """SELECT username 
                    FROM radacct 
                    WHERE CallingStationId="%s" 
@@ -228,10 +230,13 @@ def ip_to_decimal(ip):
 
 def get_db_connection():
     """Return a connection to logs_db database."""
+    db_creds_file = open(DB_CREDS_FILE, "r")
+    db_creds = db_creds_file.readlines()
+
     return pymysql.connect(
-        host="localhost", 
-        user="myuser",
-        password="mypassword",
+        host=db_creds[0].split(":")[1].strip(), 
+        user=db_creds[1].split(":")[1].strip(),
+        password=db_creds[2].split(":")[1].strip(),
         db="logs_db")
 
 
@@ -272,8 +277,6 @@ def main():
         dest_ip = notice["dest_ip"]
         dest_port = notice["dest_port"]
         timestamp = notice["timestamp"]
-
-        #print(timestamp, ip, port, dest_ip, dest_port)
         
         # Obtain nat_logs
         nat_logs = get_nat_log_filename(timestamp)
@@ -294,14 +297,14 @@ def main():
 
         # If there is only one possible pre-nat IP and port
         if type(pre_nat_ip) is bytes:
-            mac = get_mac_address_with_ip(ip)
+            mac = get_mac_address_with_ip(pre_nat_ip.decode())
             if not (mac is None): 
-                users.add(get_username_of_mac(mac, ip))
+                users.add(get_username_of_mac(mac, pre_nat_ip))
 
         # If there are multiple possible IPs and ports
         elif type(pre_nat_ip) is set:
             for ip in pre_nat_ip:
-                mac = get_mac_address_with_ip(ip)
+                mac = get_mac_address_with_ip(pre_nat_ip.decode())
                 if not (mac is None):
                     users.add(get_username_of_mac(mac, ip))
 
@@ -313,7 +316,6 @@ def main():
     print(color("-"*40))
 
     return
-
 
 if __name__ == "__main__":
     main()
