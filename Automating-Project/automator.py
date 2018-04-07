@@ -14,14 +14,14 @@ from pytz import timezone
 
 def read_notices(dir_with_notices):
     """"For all text files (notices) in dir_with_notices,
-    return a list of dictionaries containing the <Source>
-    tag. One dictionary per file. Each dictionary looks like:
+    return a list of dictionaries containing data in the <Source>
+    tag. One dictionary per file. Each dictionary looks as follows:
     
-    {'timestamp': x,
-     'ip': x,
-     'port': x,
-     'dest_ip': x,
-     'dest_port': x 
+    {"timestamp": x,
+     "ip": x,
+     "port": x,
+     "dest_ip": x,
+     "dest_port": x 
     }
     
     Note that these text files contain xml formatted data.
@@ -40,12 +40,12 @@ def read_notices(dir_with_notices):
 
         # Get children of "Source"
         dic = {
-                'timestamp': utc_to_est(source[0].text),
-                'ip': source[1].text,
-                'port': source[2].text,
-                'dest_ip': source[3].text,
-                'dest_port': source[4].text,
-                'notice_filename': filename
+                "timestamp": utc_to_est(source[0].text),
+                "ip": source[1].text,
+                "port": source[2].text,
+                "dest_ip": source[3].text,
+                "dest_port": source[4].text,
+                "notice_filename": filename
             }
 
         # Add recently created dictionary to the list
@@ -60,44 +60,14 @@ def strip_regular_text_from_xml(data):
 
     # List to store XML lines
     new_data = []
+
     # Keep lines that start with < and append them to new_data
     for line in data.splitlines():
         if line.strip().startswith("<"):
             new_data.append(line)
+
     # Convert list to string and return it
     return "\n".join(new_data)
-
-
-def get_username_of_mac(mac, ip):
-    """Given a MAC address, return the user associated with it."""
-    if ip.startswith("172.19."):
-        query = """SELECT username 
-                   FROM radacct 
-                   WHERE CallingStationId='%s' 
-                """ % mac
-    else:
-        query = """SELECT contact 
-                   FROM contactinfo 
-                   WHERE mac_string='%s' 
-                """ % mac
-
-    conn = get_db_connection()
-
-    with conn.cursor() as cursor:
-        cursor.execute(query)
-
-    result_tuple = cursor.fetchone()
-
-    if result_tuple:
-        return result_tuple[0]
-    else:
-        return None
-
-
-def timestamp_to_object(timestamp):
-   """Given a timestamp string with the format "%Y-%m-%dT%H:%M:%S",
-   return a datetime object."""
-   return datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S")
 
 
 def utc_to_est(date_string):
@@ -109,12 +79,18 @@ def utc_to_est(date_string):
     datetime_obj = datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%SZ")
     
     # Add (define) timezone of object
-    datetime_utc = datetime_obj.replace(tzinfo=timezone('UTC'))
+    datetime_utc = datetime_obj.replace(tzinfo=timezone("UTC"))
 
     # Convert to EST
-    datetime_est = datetime_utc.astimezone(timezone('US/Eastern'))
+    datetime_est = datetime_utc.astimezone(timezone("US/Eastern"))
 
     return datetime_est.strftime("%Y-%m-%dT%H:%M:%S")
+
+
+def timestamp_to_object(timestamp):
+   """Given a timestamp string with the format "%Y-%m-%dT%H:%M:%S",
+   return a datetime object."""
+   return datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S")
 
 
 def get_nat_log_filename(timestamp):
@@ -124,7 +100,8 @@ def get_nat_log_filename(timestamp):
     For example, the logs for 10:54 AM will be in the file for 
     11th hour; nat.csv.2016032111.csv.gz."""
 
-    # Get only digits of timestamp (without the timezone, or last 4 digits)
+    # Get only digits of timestamp (without the timezone, 
+    # or last 4 digits)
     only_digits_string = "".join([x for x in timestamp if x.isdigit()][:-4])
 
     # Get the last digit of the string made of digits only
@@ -137,10 +114,10 @@ def get_nat_log_filename(timestamp):
 
     # If this filename exists, return it
     if file_to_search in os.listdir("nat_logs"):
-        print("Using " + color(file_to_search, 'blue'))
+        print("Using " + color(file_to_search, "blue"))
         return "nat_logs/" + file_to_search
 
-    print(color("A NAT logs file could not be found", 'red'))
+    print(color("A NAT logs file could not be found", "red"))
     return None
 
 
@@ -164,13 +141,13 @@ def get_pre_nat_ip(timestamp, ip, port, nat_logs_file):
 
     # Return ip and port if there was a best match for timestamp
     if number_of_entries >= 1: 
-        line_fields = filtered[0].split(b",")
-        return line_fields[2]
+        entry_fields = filtered[0].split(b",")
+        return entry_fields[2]
 
     # Else, search timestamps with a window of +/- 10 minutes
     timestamp = timestamp_to_object(timestamp)
     for entry in logs_of_ip:
-        string = entry.split(b',')[0][:-10].decode('utf-8')
+        string = entry.split(b",")[0][:-10].decode("utf-8")
         entry_timestamp = timestamp_to_object(string)
         # If difference between entry time and wanted time is
         # 10 minutes or less, add to filtered
@@ -186,19 +163,12 @@ def get_pre_nat_ip(timestamp, ip, port, nat_logs_file):
     # a list of tuples of (ip, port) associated with them
     possible_ips_ports = set()
     for entry in filtered:
-        entry_fields = entry.split(b',')
+        entry_fields = entry.split(b",")
         ip = entry_fields[2]
         port = entry_fields[3]
         possible_ips_ports.add(ip)
 
     return possible_ips_ports
-
-
-def ip_to_decimal(ip):
-    """Given an IP address in string format, return
-    its decimal representation."""
-    packedIP = socket.inet_aton(ip)
-    return struct.unpack("!L", packedIP)[0]
 
 
 def get_mac_address_with_ip(ip):
@@ -207,7 +177,7 @@ def get_mac_address_with_ip(ip):
     ip_decimal = ip_to_decimal(ip)
     query = """SELECT mac_string 
                FROM dhcp 
-               WHERE ip_decimal='%s' 
+               WHERE ip_decimal="%s" 
             """ % ip_decimal
 
     conn = get_db_connection()
@@ -221,6 +191,39 @@ def get_mac_address_with_ip(ip):
         return result_tuple[0]
     else:
         return None
+
+
+def get_username_of_mac(mac, ip):
+    """Given a MAC address, return the user associated with it."""
+    if ip.startswith("172.19."):
+        query = """SELECT username 
+                   FROM radacct 
+                   WHERE CallingStationId="%s" 
+                """ % mac
+    else:
+        query = """SELECT contact 
+                   FROM contactinfo 
+                   WHERE mac_string="%s" 
+                """ % mac
+
+    conn = get_db_connection()
+
+    with conn.cursor() as cursor:
+        cursor.execute(query)
+
+    result_tuple = cursor.fetchone()
+
+    if result_tuple:
+        return result_tuple[0]
+    else:
+        return None
+
+
+def ip_to_decimal(ip):
+    """Given an IP address in string format, return
+    its decimal representation."""
+    packedIP = socket.inet_aton(ip)
+    return struct.unpack("!L", packedIP)[0]
 
 
 def get_db_connection():
@@ -241,19 +244,19 @@ def run_command(cmd_args):
     return proc.returncode, out, err
 
 
-def color(string, color='green'):
-    if color == 'green':
+def color(string, color="green"):
+    if color == "green":
         return "\033[1;32m%s\033[1;0m" % string
-    if color == 'red':
+    if color == "red":
         return "\033[1;31m%s\033[1;0m" % string
-    if color == 'yellow':
+    if color == "yellow":
         return "\033[1;33m%s\033[1;0m" % string
-    if color == 'blue':
+    if color == "blue":
         return "\033[1;34m%s\033[1;0m" % string
 
 
 def main():
-    # Get directory that contains the notices' files from command line
+    # Get directory that contains the notices" files from command line
     dir_with_notices = sys.argv[1]
 
     # Get notices data
@@ -263,12 +266,12 @@ def main():
     for notice in list_of_dictionaries_of_notices:
         print(color("-"*40))
         print("Processing notice: %s" % color(
-                                    notice['notice_filename'], 'yellow'))
-        ip = notice['ip']
-        port = notice['port']
-        dest_ip = notice['dest_ip']
-        dest_port = notice['dest_port']
-        timestamp = notice['timestamp']
+                                    notice["notice_filename"], "yellow"))
+        ip = notice["ip"]
+        port = notice["port"]
+        dest_ip = notice["dest_ip"]
+        dest_port = notice["dest_port"]
+        timestamp = notice["timestamp"]
 
         #print(timestamp, ip, port, dest_ip, dest_port)
         
