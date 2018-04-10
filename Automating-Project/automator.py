@@ -14,20 +14,20 @@ from pytz import timezone
 
 DB_CREDS_FILE = "db_creds.txt"
 
+
 def read_notices(dir_with_notices):
     """"For all text files (notices) in dir_with_notices,
     return a list of dictionaries containing data in the <Source>
     tag. One dictionary per file. Each dictionary looks as follows:
-    
+
     {"timestamp": x,
      "ip": x,
      "port": x,
      "dest_ip": x,
      "dest_port": x 
     }
-    
-    Note that these text files contain xml formatted data.
-    """
+
+    Note that these text files contain xml formatted data."""
     list_of_dictionaries_of_notices = []
 
     for filename in os.listdir(dir_with_notices):
@@ -38,17 +38,20 @@ def read_notices(dir_with_notices):
         root = ET.fromstring(strip_regular_text_from_xml(file_content))
 
         # Get the child named "Source" of root
-        source = root[3]
-
-        # Get children of "Source"
-        dic = {
-                "timestamp": utc_to_est(source[0].text),
-                "ip": source[1].text,
-                "port": source[2].text,
-                "dest_ip": source[3].text,
-                "dest_port": source[4].text,
-                "notice_filename": filename
-            }
+        for child in root:
+            tag = child.tag
+            next_tag = tag[tag.find("}")+1 : len(tag)]
+            if next_tag == "Source":
+                source = child
+                # Get children of "Source"
+                dic = {
+                    "timestamp": utc_to_est(source[0].text),
+                    "ip": source[1].text,
+                    "port": source[2].text,
+                    "dest_ip": source[3].text,
+                    "dest_port": source[4].text,
+                    "notice_filename": filename
+                }
 
         # Add recently created dictionary to the list
         list_of_dictionaries_of_notices.append(dic)
@@ -59,7 +62,6 @@ def read_notices(dir_with_notices):
 def strip_regular_text_from_xml(data):
     """Given the content of a text file (a string), return only
     its xml lines as one string."""
-
     # List to store XML lines
     new_data = []
 
@@ -76,10 +78,14 @@ def utc_to_est(date_string):
     """Given a timestamp string in UTC timezone, convert it
     to an EST datetime object, and then to a timestamp string
     with the format "%Y-%m-%dT%H:%M:%S" and return it."""
+    # If the timestamp has microseconds, remove them
+    if '.' in date_string:
+        dot = date_string.index('.')
+        date_string = date_string[:dot] + 'Z'
 
     # Create a datetime object with date_string
     datetime_obj = datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%SZ")
-    
+
     # Add (define) timezone of object
     datetime_utc = datetime_obj.replace(tzinfo=timezone("UTC"))
 
@@ -90,9 +96,9 @@ def utc_to_est(date_string):
 
 
 def timestamp_to_object(timestamp):
-   """Given a timestamp string with the format "%Y-%m-%dT%H:%M:%S",
-   return a datetime object."""
-   return datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S")
+    """Given a timestamp string with the format "%Y-%m-%dT%H:%M:%S",
+    return a datetime object."""
+    return datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S")
 
 
 def get_nat_log_filename(timestamp):
@@ -101,33 +107,33 @@ def get_nat_log_filename(timestamp):
 
     For example, the logs for 10:54 AM will be in the file for 
     11th hour; nat.csv.2016032111.csv.gz."""
-
-    # Get only digits of timestamp (without the timezone, 
+    # Get only digits of timestamp (without the timezone,
     # or last 4 digits)
     only_digits_string = "".join([x for x in timestamp if x.isdigit()][:-4])
 
-    # Get the last digit of the string made of digits only
-    last_digit = only_digits_string[-1]
+    # Get the last 2 digits of the string made out of digits only
+    last_digits = only_digits_string[-2:]
 
-    # Chop the last digit of the string, increment it, and append it back
-    file_number = only_digits_string[:-1] + str(int(last_digit) + 1)
+    # Chop the last digits of the string, convert to integer,
+    # increment it, and append it back
+    file_number = only_digits_string[:-2] + str(int(last_digits) + 1)
 
     file_to_search = "nat.csv.%s.csv.gz" % file_number
 
     # If this filename exists, return it
-    if file_to_search in os.listdir("nat_logs"):
+    if file_to_search in os.listdir("/media/sf_Downloads/nat_logs"):
         print("Using " + color(file_to_search, "blue"))
-        return "nat_logs/" + file_to_search
+        file_ = "/media/sf_Downloads/nat_logs/" + file_to_search
+        return file_
 
-    print(color("A NAT logs file could not be found", "red"))
+    print(color("A NAT logs file with name '%s' could not be found." % file_to_search, "red"))
     return None
 
 
 def get_pre_nat_ip(timestamp, ip, port, nat_logs_file):
     """Use NAT logs to identify the pre-NAT IP address
     associated with given timestamp, ip, and port."""
-
-    # Filter NAT logs by IP and port 
+    # Filter NAT logs by IP and port
     search_for = (ip + "," + port).encode()
     args = ["zgrep", search_for, nat_logs_file]
     ret, out, err = run_command(args)
@@ -142,7 +148,7 @@ def get_pre_nat_ip(timestamp, ip, port, nat_logs_file):
     number_of_entries = len(filtered)
 
     # Return ip and port if there was a best match for timestamp
-    if number_of_entries >= 1: 
+    if number_of_entries >= 1:
         entry_fields = filtered[0].split(b",")
         return entry_fields[2]
 
@@ -173,14 +179,18 @@ def get_pre_nat_ip(timestamp, ip, port, nat_logs_file):
     return possible_ips_ports
 
 
-def get_mac_address_with_ip(ip):
+def get_mac_address_with_ip(ip, timestamp):
     """Given an IP address, return the MAC address
     associated with it in the DHCP logs."""
     ip_decimal = ip_to_decimal(ip)
+    timest = timestamp.replace("T", " ")[:-5]
+    print(ip_decimal, timest)
+
     query = """SELECT mac_string 
                FROM dhcp 
-               WHERE ip_decimal="%s" 
-            """ % ip_decimal
+               WHERE ip_decimal="%s"
+               AND timestamp LIKE "%s%%"
+            """ % (ip_decimal, timest)
 
     conn = get_db_connection()
 
@@ -234,7 +244,7 @@ def get_db_connection():
     db_creds = db_creds_file.readlines()
 
     return pymysql.connect(
-        host=db_creds[0].split(":")[1].strip(), 
+        host=db_creds[0].split(":")[1].strip(),
         user=db_creds[1].split(":")[1].strip(),
         password=db_creds[2].split(":")[1].strip(),
         db="logs_db")
@@ -242,9 +252,10 @@ def get_db_connection():
 
 def run_command(cmd_args):
     """Wrapper to run a command in subprocess."""
-    proc = subprocess.Popen(cmd_args,
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE)
+    proc = subprocess.Popen(
+                    cmd_args,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE)
     out, err = proc.communicate()
     return proc.returncode, out, err
 
@@ -261,6 +272,12 @@ def color(string, color="green"):
 
 
 def main():
+    #mac = get_mac_address_with_ip("172.19.52.38")
+    #print(mac)
+    #username = get_username_of_mac(mac, b"172.19.52.38")
+    #print(username)
+    #sys.exit(0)
+
     # Get directory that contains the notices" files from command line
     dir_with_notices = sys.argv[1]
 
@@ -271,17 +288,18 @@ def main():
     for notice in list_of_dictionaries_of_notices:
         print(color("-"*40))
         print("Processing notice: %s" % color(
-                                    notice["notice_filename"], "yellow"))
+            notice["notice_filename"], "yellow"))
+        
         ip = notice["ip"]
         port = notice["port"]
         dest_ip = notice["dest_ip"]
         dest_port = notice["dest_port"]
         timestamp = notice["timestamp"]
-        
+
         # Obtain nat_logs
         nat_logs = get_nat_log_filename(timestamp)
 
-        # Skip notice if not NAT logs are found for 
+        # Skip notice if not NAT logs are found for
         # its timestamp
         if nat_logs is None:
             continue
@@ -297,14 +315,14 @@ def main():
 
         # If there is only one possible pre-nat IP and port
         if type(pre_nat_ip) is bytes:
-            mac = get_mac_address_with_ip(pre_nat_ip.decode())
-            if not (mac is None): 
+            mac = get_mac_address_with_ip(pre_nat_ip.decode(), timestamp)
+            if not (mac is None):
                 users.add(get_username_of_mac(mac, pre_nat_ip))
 
         # If there are multiple possible IPs and ports
         elif type(pre_nat_ip) is set:
             for ip in pre_nat_ip:
-                mac = get_mac_address_with_ip(pre_nat_ip.decode())
+                mac = get_mac_address_with_ip(ip.decode(), timestamp)
                 if not (mac is None):
                     users.add(get_username_of_mac(mac, ip))
 
@@ -316,6 +334,7 @@ def main():
     print(color("-"*40))
 
     return
+
 
 if __name__ == "__main__":
     main()
