@@ -13,6 +13,7 @@ from datetime import datetime, timedelta
 from pytz import timezone
 
 DB_CREDS_FILE = "db_creds.txt"
+NAT_LOGS = "/media/sf_Downloads/nat_logs/"
 
 
 def read_notices(dir_with_notices):
@@ -122,12 +123,11 @@ def get_nat_log_filename(timestamp):
     # If this filename exists, return it
     if file_to_search in os.listdir("/media/sf_Downloads/nat_logs"):
         print("Using " + color(file_to_search, "blue"))
-        return "/media/sf_Downloads/nat_logs/" + file_to_search
+        return NAT_LOGS + file_to_search
 
-    print(
-        color(
-            "A NAT logs file with name '%s'"
-            "could not be found." % file_to_search, "red"))
+    print(color(
+        "A NAT logs file with name '%s'"
+        "could not be found." % file_to_search, "red"))
 
     return None
 
@@ -186,18 +186,17 @@ def get_pre_nat_ip(timestamp, ip, port, nat_logs_file):
 
 
 def get_mac_address_with_ip(ip, timestamp):
-    """Given an IP address, return the MAC address associated with it in
-    the DHCP logs."""
+    """Given an IP address and a timestamp, return the last MAC address 
+    associated with it in the DHCP logs. This is done getting the log
+    with a timestamp just before the given timestamp."""
     ip_decimal = ip_to_decimal(ip)
-    timest = timestamp.replace("T", " ")[:-5]
 
-    #print(ip_decimal, timest) ###########################################################
-
-    query = """SELECT mac_string 
+    query = """SELECT mac_string, timestamp 
                FROM dhcp 
                WHERE ip_decimal="%s"
-               AND timestamp LIKE "%s%%"
-            """ % (ip_decimal, timest)
+               AND timestamp <= "%s"    
+               ORDER BY timestamp DESC
+            """ % (ip_decimal, timestamp)
 
     conn = get_db_connection()
 
@@ -208,11 +207,8 @@ def get_mac_address_with_ip(ip, timestamp):
     # Save first result
     result_tuple = cursor.fetchone()
 
-    # Return first result
-    if result_tuple:
-        return result_tuple[0]
-    else:
-        return None
+    # Return MAC in tuple
+    return result_tuple[0]
 
 
 def get_username_of_mac(mac, ip):
