@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module automator</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>automator</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/patrixia/Documents/Project3/automator.py">/home/patrixia/Documents/Project3/automator.py</a></font></td></tr></table>
+    <p><tt>Practical&nbsp;Cybersecurity:&nbsp;Project&nbsp;3.<br>
+Student:&nbsp;Patricia&nbsp;Wilthew.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="xml.etree.ElementTree.html">xml.etree.ElementTree</a><br>
+<a href="os.html">os</a><br>
+</td><td width="25%" valign=top><a href="pymysql.html">pymysql</a><br>
+<a href="re.html">re</a><br>
+</td><td width="25%" valign=top><a href="socket.html">socket</a><br>
+<a href="struct.html">struct</a><br>
+</td><td width="25%" valign=top><a href="subprocess.html">subprocess</a><br>
+<a href="sys.html">sys</a><br>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-color"><strong>color</strong></a>(string, color='green')</dt><dd><tt>Given&nbsp;a&nbsp;string&nbsp;and&nbsp;a&nbsp;color,&nbsp;add&nbsp;to&nbsp;string&nbsp;the&nbsp;necessary&nbsp;encoding<br>
+to&nbsp;color&nbsp;it&nbsp;when&nbsp;printed&nbsp;into&nbsp;the&nbsp;terminal.</tt></dd></dl>
+ <dl><dt><a name="-get_db_connection"><strong>get_db_connection</strong></a>()</dt><dd><tt>Return&nbsp;a&nbsp;connection&nbsp;to&nbsp;logs_db&nbsp;database.</tt></dd></dl>
+ <dl><dt><a name="-get_mac_address_with_ip"><strong>get_mac_address_with_ip</strong></a>(ip, timestamp)</dt><dd><tt>Given&nbsp;an&nbsp;IP&nbsp;address&nbsp;and&nbsp;a&nbsp;timestamp,&nbsp;return&nbsp;the&nbsp;last&nbsp;MAC&nbsp;address&nbsp;<br>
+associated&nbsp;with&nbsp;it&nbsp;in&nbsp;the&nbsp;DHCP&nbsp;logs.&nbsp;This&nbsp;is&nbsp;done&nbsp;getting&nbsp;the&nbsp;log<br>
+with&nbsp;a&nbsp;timestamp&nbsp;just&nbsp;before&nbsp;the&nbsp;given&nbsp;timestamp.</tt></dd></dl>
+ <dl><dt><a name="-get_nat_log_filename"><strong>get_nat_log_filename</strong></a>(timestamp)</dt><dd><tt>"Given&nbsp;a&nbsp;timestamp&nbsp;string,&nbsp;return&nbsp;the&nbsp;file&nbsp;name&nbsp;that&nbsp;contains&nbsp;the<br>
+NAT&nbsp;logs&nbsp;that&nbsp;occurred&nbsp;before&nbsp;that&nbsp;datetime.<br>
+&nbsp;<br>
+For&nbsp;example,&nbsp;the&nbsp;logs&nbsp;for&nbsp;10:54&nbsp;AM&nbsp;will&nbsp;be&nbsp;in&nbsp;the&nbsp;file&nbsp;for&nbsp;11th&nbsp;hour;<br>
+nat.csv.2016032111.csv.gz.</tt></dd></dl>
+ <dl><dt><a name="-get_pre_nat_ip"><strong>get_pre_nat_ip</strong></a>(timestamp, ip, port, nat_logs_file)</dt><dd><tt>Use&nbsp;NAT&nbsp;logs&nbsp;to&nbsp;identify&nbsp;the&nbsp;pre-NAT&nbsp;IP&nbsp;address(es)&nbsp;associated&nbsp;<br>
+with&nbsp;given&nbsp;timestamp,&nbsp;ip,&nbsp;and&nbsp;port.</tt></dd></dl>
+ <dl><dt><a name="-get_username_of_mac"><strong>get_username_of_mac</strong></a>(mac, ip)</dt><dd><tt>Given&nbsp;a&nbsp;MAC&nbsp;address,&nbsp;return&nbsp;the&nbsp;user&nbsp;associated&nbsp;with&nbsp;it.</tt></dd></dl>
+ <dl><dt><a name="-ip_to_decimal"><strong>ip_to_decimal</strong></a>(ip)</dt><dd><tt>Given&nbsp;an&nbsp;IP&nbsp;address&nbsp;in&nbsp;string&nbsp;format,&nbsp;return&nbsp;its&nbsp;decimal&nbsp;<br>
+representation.</tt></dd></dl>
+ <dl><dt><a name="-main"><strong>main</strong></a>()</dt><dd><tt>Given&nbsp;a&nbsp;directory&nbsp;of&nbsp;notices,&nbsp;return&nbsp;the&nbsp;usernames&nbsp;corresponding<br>
+to&nbsp;the&nbsp;actor&nbsp;of&nbsp;each&nbsp;notice.</tt></dd></dl>
+ <dl><dt><a name="-read_notices"><strong>read_notices</strong></a>(dir_with_notices)</dt><dd><tt>"For&nbsp;all&nbsp;text&nbsp;files&nbsp;(notices)&nbsp;in&nbsp;dir_with_notices,<br>
+return&nbsp;a&nbsp;list&nbsp;of&nbsp;dictionaries&nbsp;containing&nbsp;data&nbsp;in&nbsp;the&nbsp;&lt;Source&gt;<br>
+tag.&nbsp;One&nbsp;dictionary&nbsp;per&nbsp;file.&nbsp;Each&nbsp;dictionary&nbsp;looks&nbsp;as&nbsp;follows:<br>
+&nbsp;<br>
+{"timestamp":&nbsp;x,<br>
+&nbsp;"ip":&nbsp;x,<br>
+&nbsp;"port":&nbsp;x,<br>
+&nbsp;"dest_ip":&nbsp;x,<br>
+&nbsp;"dest_port":&nbsp;x}<br>
+&nbsp;<br>
+Note&nbsp;that&nbsp;these&nbsp;text&nbsp;files&nbsp;contain&nbsp;xml&nbsp;formatted&nbsp;data.</tt></dd></dl>
+ <dl><dt><a name="-run_command"><strong>run_command</strong></a>(cmd_args)</dt><dd><tt>Wrapper&nbsp;to&nbsp;run&nbsp;a&nbsp;command&nbsp;in&nbsp;subprocess.</tt></dd></dl>
+ <dl><dt><a name="-strip_regular_text_from_xml"><strong>strip_regular_text_from_xml</strong></a>(data)</dt><dd><tt>Given&nbsp;the&nbsp;content&nbsp;of&nbsp;a&nbsp;text&nbsp;file&nbsp;(a&nbsp;string),&nbsp;return&nbsp;only&nbsp;its&nbsp;xml<br>
+lines&nbsp;as&nbsp;one&nbsp;string.</tt></dd></dl>
+ <dl><dt><a name="-timestamp_to_object"><strong>timestamp_to_object</strong></a>(timestamp)</dt><dd><tt>Given&nbsp;a&nbsp;timestamp&nbsp;string&nbsp;with&nbsp;the&nbsp;format&nbsp;"%Y-%m-%dT%H:%M:%S",<br>
+return&nbsp;a&nbsp;datetime&nbsp;object.</tt></dd></dl>
+ <dl><dt><a name="-utc_to_est"><strong>utc_to_est</strong></a>(date_string)</dt><dd><tt>Given&nbsp;a&nbsp;timestamp&nbsp;string&nbsp;in&nbsp;UTC&nbsp;timezone,&nbsp;convert&nbsp;it&nbsp;to&nbsp;an&nbsp;EST&nbsp;<br>
+datetime&nbsp;object,&nbsp;and&nbsp;then&nbsp;to&nbsp;a&nbsp;timestamp&nbsp;string&nbsp;with&nbsp;the&nbsp;format&nbsp;<br>
+"%Y-%m-%dT%H:%M:%S"&nbsp;and&nbsp;return&nbsp;it.</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>DB_CREDS_FILE</strong> = 'db_creds.txt'<br>
+<strong>NAT_LOGS</strong> = '/media/sf_Downloads/nat_logs/'</td></tr></table>
+</body></html>
